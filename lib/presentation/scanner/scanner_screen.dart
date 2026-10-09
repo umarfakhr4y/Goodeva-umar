@@ -1,21 +1,75 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import '../../domain/entities/ble_device.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'scanner_viewmodel.dart';
 import '../providers/app_providers.dart';
 import '../radar/radar_screen.dart';
 import '../history/history_screen.dart';
 
-class ScannerScreen extends ConsumerWidget {
+import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+
+class ScannerScreen extends ConsumerStatefulWidget {
   const ScannerScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ScannerScreen> createState() => _ScannerScreenState();
+}
+
+class _ScannerScreenState extends ConsumerState<ScannerScreen> with WidgetsBindingObserver {
+  
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    final repo = ref.read(bleRepositoryProvider);
+    if (state == AppLifecycleState.paused) {
+      if (ref.read(isScanningProvider)) {
+        repo.stopScan();
+      }
+    } else if (state == AppLifecycleState.resumed) {
+      if (ref.read(isScanningProvider)) {
+        repo.startScan();
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final devices = ref.watch(filteredScanResultsProvider);
     final isScanning = ref.watch(isScanningProvider);
+    final bluetoothState = ref.watch(bluetoothStateProvider).value;
+
+    if (bluetoothState != null && bluetoothState != BluetoothAdapterState.on) {
+      return const Scaffold(
+        backgroundColor: Colors.black,
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.bluetooth_disabled, color: Colors.redAccent, size: 80),
+              SizedBox(height: 16),
+              Text('Bluetooth is Off', style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
+              SizedBox(height: 8),
+              Text('Please turn on Bluetooth to scan for devices.', style: TextStyle(color: Colors.white70)),
+            ],
+          ),
+        ),
+      );
+    }
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A), // Deep Slate
+      backgroundColor: Colors.black, // Pure black
       appBar: AppBar(
         title: const Text('BLE Scanner', style: TextStyle(fontWeight: FontWeight.w600)),
         backgroundColor: Colors.transparent,
@@ -31,44 +85,23 @@ class ScannerScreen extends ConsumerWidget {
         ],
       ),
       extendBodyBehindAppBar: true,
-      body: Stack(
-        children: [
-          // Background Gradient
-          Positioned(
-            top: -100,
-            right: -100,
-            child: Container(
-              width: 300,
-              height: 300,
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-                color: Color(0xFF3B82F6), // Blue 500
-              ),
-            ),
-          ),
-          Positioned(
-            bottom: -50,
-            left: -50,
-            child: Container(
-              width: 250,
-              height: 250,
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-                color: Color(0xFF8B5CF6), // Violet 500
-              ),
-            ),
-          ),
-          BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 100, sigmaY: 100),
-            child: Container(color: Colors.transparent),
-          ),
-
-          SafeArea(
-            child: Column(
-              children: [
-                _buildControls(context, ref, isScanning),
-                Expanded(
-                  child: ListView.builder(
+      body: SafeArea(
+        child: Column(
+          children: [
+            _buildControls(context, ref, isScanning),
+            Expanded(
+              child: devices.isEmpty 
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.bluetooth_searching, size: 64, color: Colors.white.withValues(alpha: 0.3)),
+                        const SizedBox(height: 16),
+                        const Text('Mencari perangkat di sekitarmu...', style: TextStyle(color: Colors.white54)),
+                      ],
+                    ),
+                  )
+                : ListView.builder(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     itemCount: devices.length,
                     itemBuilder: (context, index) {
@@ -76,11 +109,9 @@ class ScannerScreen extends ConsumerWidget {
                       return _DeviceCard(device: device);
                     },
                   ),
-                ),
-              ],
             ),
-          ),
-        ],
+          ],
+        ),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
@@ -93,7 +124,7 @@ class ScannerScreen extends ConsumerWidget {
             ref.read(isScanningProvider.notifier).state = true;
           }
         },
-        backgroundColor: isScanning ? Colors.redAccent : Colors.blueAccent,
+        backgroundColor: isScanning ? Colors.redAccent : Colors.grey[800],
         icon: Icon(isScanning ? Icons.stop : Icons.play_arrow, color: Colors.white),
         label: Text(isScanning ? 'Stop' : 'Scan', style: const TextStyle(color: Colors.white)),
       ),

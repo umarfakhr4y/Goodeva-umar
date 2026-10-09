@@ -11,12 +11,21 @@ class HistoryScreen extends ConsumerWidget {
     final historyAsync = ref.watch(historyProvider);
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: Colors.black,
       appBar: AppBar(
         title: const Text('Device History'),
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.white),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.delete_outline, color: Colors.white),
+            onPressed: () async {
+              await ref.read(historyRepositoryProvider).clearHistory();
+              ref.invalidate(historyProvider);
+            },
+          ),
+        ],
       ),
       body: historyAsync.when(
         data: (devices) {
@@ -45,10 +54,10 @@ class HistoryScreen extends ConsumerWidget {
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Colors.blueAccent.withOpacity(0.2),
+                        color: Colors.white.withValues(alpha: 0.1),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.history, color: Colors.blueAccent),
+                      child: const Icon(Icons.history, color: Colors.white),
                     ),
                     const SizedBox(width: 16),
                     Expanded(

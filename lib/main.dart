@@ -9,11 +9,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   configureDependencies();
   await _requestPermissions();
-  runApp(
-    const ProviderScope(
-      child: BleTrackerApp(),
-    ),
-  );
+  runApp(const ProviderScope(child: BleTrackerApp()));
 }
 
 Future<void> _requestPermissions() async {
@@ -34,9 +30,11 @@ class BleTrackerApp extends StatelessWidget {
       title: 'BLE Tracker',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF0F172A), // Slate 900
+          seedColor: Colors.black, // Pure black
           brightness: Brightness.dark,
+          surface: Colors.black,
         ),
+        scaffoldBackgroundColor: Colors.black,
         useMaterial3: true,
         textTheme: GoogleFonts.interTextTheme(ThemeData.dark().textTheme),
       ),

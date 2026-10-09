@@ -7,6 +7,7 @@ import 'package:sqflite/sqflite.dart';
 abstract class HistoryRepository {
   Future<void> saveDevice(DeviceHistory device);
   Future<List<DeviceHistory>> getHistory();
+  Future<void> clearHistory();
 }
 
 @LazySingleton(as: HistoryRepository)
@@ -32,5 +33,11 @@ class HistoryRepositoryImpl implements HistoryRepository {
     return List.generate(maps.length, (i) {
       return DeviceHistory.fromMap(maps[i]);
     });
+  }
+
+  @override
+  Future<void> clearHistory() async {
+    final db = await _databaseHelper.database;
+    await db.delete('history');
   }
 }
