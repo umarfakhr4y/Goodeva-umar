@@ -37,3 +37,11 @@ APK dapat ditemukan di direktori `build/app/outputs/flutter-apk/app-release.apk`
 ## Catatan Tambahan (Known Issues & Asumsi)
 - Izin Bluetooth dan Lokasi wajib diberikan secara runtime untuk menggunakan aplikasi.
 - Kalkulasi jarak menggunakan kategori RSSI murni dan dapat dipengaruhi oleh interferensi gelombang di dunia nyata.
+
+## Generative AI Disclosure
+Sesuai dengan ketentuan pengumpulan tugas, saya mengonfirmasi penggunaan AI generatif selama proses pengembangan proyek ini. Bantuan AI dimanfaatkan khusus pada aspek:
+1. **Boilerplate & Layouting:** Pembuatan struktur dasar kode UI Flutter (seperti penyusunan *widget tree* untuk efek *glassmorphism* dan mode gelap).
+2. **Implementasi Logic Dasar:** Penyusunan logika awal algoritma filtering, *sorting* RSSI, serta kerangka *Clean Architecture*.
+3. **Drafting Dokumentasi:** Pendampingan dalam penulisan draf awal untuk dokumentasi *README* ini.
+
+Setiap baris kode yang dihasilkan telah saya pelajari, uji secara menyeluruh (termasuk *edge-cases*), dan sesuaikan secara mendalam agar memenuhi kaidah *Best Practice* Mobile Engineering serta menjawab seluruh parameter dari *study case* yang diberikan.
